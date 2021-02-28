@@ -482,7 +482,7 @@ function ENT:Think()
 		-- Button pressing
 		if (self.AllowButtons and distance < 82) then
 			local button = trace.Entity
-			if IsValid(button) and (ply:KeyDown( IN_ATTACK ) and not self.MouseDown) and button.Use then
+			if IsValid(button) and (ply:KeyDown( IN_ATTACK ) and not self.MouseDown) and not button:IsVehicle() and button.Use then
 				-- Generic support (Buttons, Dynamic Buttons, Levers, EGP screens, etc)
 				self.MouseDown = true
 				button:Use(ply, self, USE_ON, 0)
@@ -496,8 +496,6 @@ function ENT:Think()
 		WireLib.TriggerOutput(self, "Health", ply:Health())
 		WireLib.TriggerOutput(self, "Armor", ply:Armor())
 		if self:HasPod() then WireLib.TriggerOutput(self, "ThirdPerson", pod:GetThirdPersonMode() and 1 or 0) end
-
-		if not ply:IsBot() then WireLib.TriggerOutput(self, "Light", ply.keystate[KEY_F] and 1 or 0) end
 	end
 
 	self:NextThink( CurTime() )

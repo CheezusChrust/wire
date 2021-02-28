@@ -367,6 +367,42 @@ e2function number entity:stress()
 	return phys:GetStress() or 0
 end
 
+local ids = {
+	["EnergyAbsorbed"] = "n",
+	["FrictionCoefficient"] = "n",
+	["NormalForce"] = "n",
+	["Normal"] = "v",
+	["ContactPoint"] = "v",
+}
+
+e2function table entity:frictionSnapshot()
+	local ret = {n={},ntypes={},s={},stypes={},size=0} -- default table
+	if not validPhysics(this) then return ret end
+
+	local events = this:GetPhysicsObject():GetFrictionSnapshot()
+	for i, event in ipairs(events) do
+		local data = {n={},ntypes={},s={},stypes={},size=0}
+		local size = 0
+
+		for k, v in pairs(event) do
+			if ids[k] then
+				data.s[k] = v
+				data.stypes[k] = ids[k]
+				size = size + 1
+			end
+		end
+
+		data.size = size
+		ret.n[i] = data
+		ret.ntypes[i] = "t"
+	end
+
+	ret.size = #events
+	self.prf = self.prf + ret.size * 50
+
+	return ret
+end
+
 /******************************************************************************/
 // Functions getting boolean/number
 e2function number entity:isPlayer()
@@ -888,9 +924,7 @@ local function upperfirst( word )
 	return word:Left(1):upper() .. word:Right(-2):lower()
 end
 
-local function fixdef( def )
-	return istable(def) and table.Copy(def) or def
-end
+local fixDefault = E2Lib.fixDefault
 
 local non_allowed_types = {
 	xgt = true,
@@ -909,10 +943,10 @@ registerCallback("postinit",function()
 			local function getf( self, args )
 				local op1, op2 = args[2], args[3]
 				local rv1, rv2 = op1[1](self, op1), op2[1](self, op2)
-				if not IsValid(rv1) or not rv2 then return fixdef( v[2] ) end
+				if not IsValid(rv1) or not rv2 then return fixDefault( v[2] ) end
 				local id = self.uid
-				if not rv1["EVar_"..id] then return fixdef( v[2] ) end
-				return rv1["EVar_"..id][rv2] or fixdef( v[2] )
+				if not rv1["EVar_"..id] then return fixDefault( v[2] ) end
+				return rv1["EVar_"..id][rv2] or fixDefault( v[2] )
 			end
 
 			local function setf( self, args )
