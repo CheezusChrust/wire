@@ -217,6 +217,7 @@ function ENT:UnlinkEnt()
 	end
 	self:SetShowCursor( 0 )
 	self.Pod = nil
+	self:PlayerExited()
 	WireLib.SendMarks(self, {})
 	WireLib.TriggerOutput( self, "Entity", NULL )
 	self:ColorByLinkStatus(self.LINK_STATUS_UNLINKED)
@@ -232,7 +233,7 @@ function ENT:SetPod( pod )
 	if pod and pod:IsValid() and not pod:IsVehicle() then return false end
 
 	if self:HasPly() then
-		self:PlayerExited(self:GetPly())
+		self:PlayerExited()
 	else
 		self:ColorByLinkStatus(IsValid(pod) and self.LINK_STATUS_LINKED or self.LINK_STATUS_UNLINKED)
 	end
@@ -456,11 +457,13 @@ function ENT:Think()
 			if (self.Relative) then
 				local originalangle
 				if (self.RC) then
-					originalangle = ply.InitialAngle
+					originalangle = self.RC.InitialAngle
 				else
-					originalangle = pod:GetAngles()
-					if pod:GetClass() ~= "prop_vehicle_prisoner_pod" then
-						originalangle.y = originalangle.y + 90
+					local attachment = pod:LookupAttachment( "vehicle_driver_eyes" )
+					if (attachment > 0) then
+						originalangle = pod:GetAttachment( attachment ).Ang
+					else
+						originalangle = pod:GetAngles()
 					end
 				end
 				WireLib.TriggerOutput( self, "Bearing", fixupangle( angle.y - originalangle.y ) )
@@ -533,8 +536,10 @@ function ENT:PlayerEntered( ply, RC )
 	self:SetActivated( true )
 end
 
-function ENT:PlayerExited( ply )
+function ENT:PlayerExited()
 	if not self:HasPly() then return end
+
+	local ply = self:GetPly()
 
 	self:HidePlayer( false )
 
@@ -576,7 +581,7 @@ end)
 hook.Add( "PlayerLeaveVehicle", "Wire_Pod_ExitVehicle", function( ply, vehicle )
 	for _, v in pairs( ents.FindByClass( "gmod_wire_pod" ) ) do
 		if (v:HasPod() and v:GetPod() == vehicle) then
-			v:PlayerExited( ply )
+			v:PlayerExited()
 		end
 	end
 end)
