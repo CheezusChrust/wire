@@ -17,8 +17,10 @@ function ENT:SetModes( XYZMode, AngVel )
 end
 
 local function rootParent(e)
-	if e:GetParent() then
-		return rootParent(e:GetParent())
+	local parent = e:GetParent()
+
+	if parent and parent:IsValid() then
+		return rootParent(parent)
 	end
 
 	return e
@@ -94,7 +96,7 @@ function ENT:Think()
 		Wire_TriggerOutput(self, "Y", vel.x)
 		Wire_TriggerOutput(self, "Z", vel.z)
 	else
-		local vel = self:GetVelocity():Length()
+		local vel = ent:GetVelocity():Length()
 		if (COLOSSAL_SANDBOX) then vel = vel * 6.25 end
 		Wire_TriggerOutput(self, "Out", vel)
 		Wire_TriggerOutput(self, "MPH", vel / 23.467)
