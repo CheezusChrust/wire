@@ -16,16 +16,26 @@ function ENT:SetModes( XYZMode, AngVel )
 	self:SetNWBool( 1, AngVel )
 end
 
+local function rootParent(e)
+	if e:GetParent() then
+		return rootParent(e:GetParent())
+	end
+
+	return e
+end
+
 if CLIENT then
 	function ENT:Think()
 		BaseClass.Think(self)
 
 		local txt
+		local ent = rootParent(self)
+
 		if (self:GetXYZMode()) then
-			local vel = self:WorldToLocal(self:GetVelocity()+self:GetPos())
+			local vel = ent:WorldToLocal(ent:GetVelocity()+ent:GetPos())
 			txt =  "Velocity = " .. math.Round((-vel.y or 0)*1000)/1000 .. "," .. math.Round((vel.x or 0)*1000)/1000 .. "," .. math.Round((vel.z or 0)*1000)/1000
 		else
-			local vel = self:GetVelocity():Length()
+			local vel = ent:GetVelocity():Length()
 			txt =  "Speed = " .. math.Round((vel or 0)*1000)/1000
 		end
 
@@ -75,9 +85,10 @@ end
 
 function ENT:Think()
 	BaseClass.Think(self)
+	local ent = rootParent(self)
 
 	if (self.XYZMode) then
-		local vel = self:WorldToLocal(self:GetVelocity()+self:GetPos())
+		local vel = ent:WorldToLocal(ent:GetVelocity()+ent:GetPos())
 		if (COLOSSAL_SANDBOX) then vel = vel * 6.25 end
 		Wire_TriggerOutput(self, "X", -vel.y)
 		Wire_TriggerOutput(self, "Y", vel.x)
@@ -93,7 +104,7 @@ function ENT:Think()
 	end
 
 	if (self.AngVel) then
-		local ang = self:GetPhysicsObject():GetAngleVelocity()
+		local ang = ent:GetPhysicsObject():GetAngleVelocity()
 		Wire_TriggerOutput(self, "AngVel_P", ang.y)
 		Wire_TriggerOutput(self, "AngVel_Y", ang.z)
 		Wire_TriggerOutput(self, "AngVel_R", ang.x)
