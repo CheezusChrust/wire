@@ -960,7 +960,9 @@ E2Helper.Descriptions["stopAllTimers()"] = "Stops all timers"
 
 -- Unit conversion
 E2Helper.Descriptions["toUnit(sn)"] = "Converts default garrysmod units to specified units"
+E2Helper.Descriptions["toUnitPS(sn)"] = "Converts default garrysmod units to specified units using entity/playerscale"
 E2Helper.Descriptions["fromUnit(sn)"] = "Converts specified units to default garrysmod units"
+E2Helper.Descriptions["fromUnitPS(sn)"] = "Converts specified units to default garrysmod units using entity/playerscale"
 E2Helper.Descriptions["convertUnit(ssn)"] = "Converts between two units"
 
 -- Steam ID conversion
