@@ -16,16 +16,28 @@ function ENT:SetModes( XYZMode, AngVel )
 	self:SetNWBool( 1, AngVel )
 end
 
+local function rootParent(e)
+	local parent = e:GetParent()
+
+	if parent and parent:IsValid() then
+		return rootParent(parent)
+	end
+
+	return e
+end
+
 if CLIENT then
 	function ENT:Think()
 		BaseClass.Think(self)
 
 		local txt
+		local ent = rootParent(self)
+
 		if (self:GetXYZMode()) then
-			local vel = self:WorldToLocal(self:GetVelocity()+self:GetPos())
+			local vel = ent:WorldToLocal(ent:GetVelocity()+ent:GetPos())
 			txt =  "Velocity = " .. math.Round((-vel.y or 0)*1000)/1000 .. "," .. math.Round((vel.x or 0)*1000)/1000 .. "," .. math.Round((vel.z or 0)*1000)/1000
 		else
-			local vel = self:GetVelocity():Length()
+			local vel = ent:GetVelocity():Length()
 			txt =  "Speed = " .. math.Round((vel or 0)*1000)/1000
 		end
 
@@ -52,7 +64,7 @@ function ENT:Initialize()
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
 
-	self.Outputs = Wire_CreateOutputs(self, { "Out", "MPH", "KPH" })
+	self.Outputs = Wire_CreateOutputs(self, { "Out", "MPH", "KPH", "MPH_PS", "KPH_PS" })
 end
 
 function ENT:Setup( xyz_mode, AngVel )
@@ -65,7 +77,7 @@ function ENT:Setup( xyz_mode, AngVel )
 	if (xyz_mode) then
 		outs = { "X", "Y", "Z" }
 	else
-		outs = { "Out", "MPH",  "KPH", }
+		outs = { "Out", "MPH",  "KPH", "MPH_PS", "KPH_PS"}
 	end
 	if (AngVel) then
 		table.Add(outs, {"AngVel_P", "AngVel_Y", "AngVel_R" } )
@@ -75,23 +87,26 @@ end
 
 function ENT:Think()
 	BaseClass.Think(self)
+	local ent = rootParent(self)
 
 	if (self.XYZMode) then
-		local vel = self:WorldToLocal(self:GetVelocity()+self:GetPos())
+		local vel = ent:WorldToLocal(ent:GetVelocity()+ent:GetPos())
 		if (COLOSSAL_SANDBOX) then vel = vel * 6.25 end
 		Wire_TriggerOutput(self, "X", -vel.y)
 		Wire_TriggerOutput(self, "Y", vel.x)
 		Wire_TriggerOutput(self, "Z", vel.z)
 	else
-		local vel = self:GetVelocity():Length()
+		local vel = ent:GetVelocity():Length()
 		if (COLOSSAL_SANDBOX) then vel = vel * 6.25 end
-		Wire_TriggerOutput(self, "Out", vel) // vel = Source Units / sec, Source Units = Inch * 0.75 , more info here: http://developer.valvesoftware.com/wiki/Dimensions#Map_Grid_Units:_quick_reference
-		Wire_TriggerOutput(self, "MPH", vel * 3600 / 63360 * 0.75)
-		Wire_TriggerOutput(self, "KPH", vel * 3600 * 0.0000254 * 0.75)
+		Wire_TriggerOutput(self, "Out", vel)
+		Wire_TriggerOutput(self, "MPH", vel / 23.467)
+		Wire_TriggerOutput(self, "KPH", vel / 14.58)
+		Wire_TriggerOutput(self, "MPH_PS", vel / 17.6) -- The valve dev wiki specifies speed is usually given in map scale, HOWEVER, physics calculations are in entity scale
+		Wire_TriggerOutput(self, "KPH_PS", vel / 10.936) -- In that case, it makes more sense to be consistent and use entity scale given that the base unit (u/s) is equal to in/s
 	end
 
 	if (self.AngVel) then
-		local ang = self:GetPhysicsObject():GetAngleVelocity()
+		local ang = ent:GetPhysicsObject():GetAngleVelocity()
 		Wire_TriggerOutput(self, "AngVel_P", ang.y)
 		Wire_TriggerOutput(self, "AngVel_Y", ang.z)
 		Wire_TriggerOutput(self, "AngVel_R", ang.x)

@@ -106,12 +106,38 @@ e2function number toUnit(string rv1, rv2)
 	return -1
 end
 
+e2function number toUnitPS(string rv1, rv2)
+
+	if speed[rv1] then
+		return (rv2) * speed[rv1]
+	elseif length[rv1] then
+		return (rv2) * length[rv1]
+	elseif weight[rv1] then
+		return rv2 * weight[rv1]
+	end
+
+	return -1
+end
+
 e2function number fromUnit(string rv1, rv2)
 
 	if speed[rv1] then
-		return (rv2 / 0.75) / speed[rv1]
+		return (rv2 * 0.75) / speed[rv1]
 	elseif length[rv1] then
 		return (rv2 / 0.75) / length[rv1]
+	elseif weight[rv1] then
+		return rv2 / weight[rv1]
+	end
+
+	return -1
+end
+
+e2function number fromUnitPS(string rv1, rv2)
+
+	if speed[rv1] then
+		return (rv2) / speed[rv1]
+	elseif length[rv1] then
+		return (rv2) / length[rv1]
 	elseif weight[rv1] then
 		return rv2 / weight[rv1]
 	end
