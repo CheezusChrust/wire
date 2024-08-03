@@ -124,7 +124,7 @@ end
 
 e2function number entity:armor()
 	if not IsValid(this) then return self:throw("Invalid entity!", 0) end
-	if not this:IsPlayer() and not this:IsNPC() then return self:throw("Expected a Player or NPC but got an entity!", 0) end
+	if not this:IsPlayer() then return self:throw("Expected a Player but got an entity!", 0) end
 	return this:Armor()
 end
 
@@ -189,7 +189,7 @@ e2function number teamMemberCount(teamNum)
 	return team.NumPlayers(teamNum)
 end
 
-[deprecated]
+[deprecated = "Use function teamMemberCount instead"]
 e2function number teamPlayers(teamNum) = e2function number teamMemberCount(teamNum)
 
 e2function number teamDeaths(teamNum)
