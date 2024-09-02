@@ -74,7 +74,7 @@ local function soundCreate(self, entity, index, time, path, fade)
 	path = string.Trim(string.sub(path, 1, 260))
 	if path:match('["?]') then return end
 
-	if not file.Exists("sound/" .. path, "GAME") then return end
+	--if not file.Exists("sound/" .. path, "GAME") then return end
 	local data = self.data.sound_data
 	if not isAllowed( self ) then return end
 
