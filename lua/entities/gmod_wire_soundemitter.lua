@@ -166,8 +166,8 @@ end
 function ENT:SetSound(soundName)
 	self:StopSounds()
 
-	soundName = WireLib.SoundExists(soundName)
-	if not soundName then return end
+	--soundName = WireLib.SoundExists(soundName)
+	--if not soundName then return end
 
 	util.PrecacheSound(soundName)
 	self.sound = soundName
